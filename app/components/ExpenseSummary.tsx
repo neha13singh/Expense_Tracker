@@ -1,6 +1,6 @@
 "use client";
 
-import { Expense } from "./Dashboard";
+import { Expense } from "@/app/types";
 
 interface SummaryItem {
     tagName: string;
@@ -50,7 +50,7 @@ export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
                             <span className="font-medium text-zinc-900">{item.tagName}</span>
                             <span className="text-zinc-500 text-xs">({item.percentage.toFixed(1)}%)</span>
                         </div>
-                        <span className="font-mono text-zinc-700">${item.total.toFixed(2)}</span>
+                        <span className="font-mono text-zinc-700">₹{item.total.toFixed(2)}</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-zinc-100 overflow-hidden border border-zinc-100">
                         <div

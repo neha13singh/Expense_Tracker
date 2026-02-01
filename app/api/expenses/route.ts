@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     try {
-        const { amount, tagName, date } = await request.json();
+        const { amount, tagName, date, description } = await request.json();
 
         if (!amount || !tagName || !date) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -84,6 +84,7 @@ export async function POST(request: Request) {
                 tagId: tag.id,
                 amount: parseFloat(amount),
                 date: new Date(date),
+                description: description || null,
             },
             include: {
                 tag: true

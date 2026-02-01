@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 export function ExpenseForm({ onSuccess }: { onSuccess: () => void }) {
     const [amount, setAmount] = useState("");
     const [tagName, setTagName] = useState("");
+    const [description, setDescription] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
     const [loading, setLoading] = useState(false);
 
@@ -17,12 +18,13 @@ export function ExpenseForm({ onSuccess }: { onSuccess: () => void }) {
             const res = await fetch("/api/expenses", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount, tagName, date }),
+                body: JSON.stringify({ amount, tagName, date, description }),
             });
 
             if (res.ok) {
                 setAmount("");
                 setTagName("");
+                setDescription("");
                 onSuccess();
             }
         } catch (error) {
@@ -38,7 +40,7 @@ export function ExpenseForm({ onSuccess }: { onSuccess: () => void }) {
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-zinc-500 uppercase">Amount</label>
                     <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">$</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">₹</span>
                         <input
                             type="number"
                             step="0.01"
@@ -80,6 +82,17 @@ export function ExpenseForm({ onSuccess }: { onSuccess: () => void }) {
                     <option value="Entertainment" />
                     <option value="Shopping" />
                 </datalist>
+            </div>
+
+            <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-500 uppercase">Description (Optional)</label>
+                <input
+                    type="text"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 placeholder-zinc-400 focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 focus:outline-none transition-all"
+                    placeholder="e.g. Lunch with team"
+                />
             </div>
 
             <button

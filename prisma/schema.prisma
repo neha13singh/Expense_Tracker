@@ -34,6 +34,7 @@ model Expense {
   tagId     String
   tag       Tag      @relation(fields: [tagId], references: [id])
   amount    Float
+  description String?
   date      DateTime
   createdAt DateTime @default(now())
 }
