@@ -9,7 +9,7 @@ interface SummaryItem {
     percentage: number;
 }
 
-export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
+export function ExpenseSummary({ expenses, onTagClick }: { expenses: Expense[], onTagClick?: (tagName: string) => void }) {
     const total = expenses.reduce((sum, e) => sum + e.amount, 0);
 
     const summary = expenses.reduce((acc, expense) => {
@@ -44,10 +44,14 @@ export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
     return (
         <div className="space-y-4">
             {summary.map((item) => (
-                <div key={item.tagName} className="group">
+                <div
+                    key={item.tagName}
+                    className={`group ${onTagClick ? 'cursor-pointer hover:bg-zinc-50 p-2 -mx-2 rounded-lg transition-colors' : ''}`}
+                    onClick={() => onTagClick?.(item.tagName)}
+                >
                     <div className="flex items-center justify-between text-sm mb-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-medium text-zinc-900">{item.tagName}</span>
+                            <span className="font-medium text-zinc-900 group-hover:text-indigo-600 transition-colors">{item.tagName}</span>
                             <span className="text-zinc-500 text-xs">({item.percentage.toFixed(1)}%)</span>
                         </div>
                         <span className="font-mono text-zinc-700">₹{item.total.toFixed(2)}</span>

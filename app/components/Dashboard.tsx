@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/app/context/AuthContext";
-import { format, addMonths, subMonths } from "date-fns";
+import { format, addMonths, subMonths, isSameDay } from "date-fns";
 import { ChevronLeft, ChevronRight, LogOut, Trash2 } from "lucide-react";
 import { ExpenseForm } from "./ExpenseForm";
 import { ExpenseSummary } from "./ExpenseSummary";
+import { ReportsDashboard } from "./ReportsDashboard";
 
 import { Expense, Tag } from "@/app/types";
 
@@ -15,6 +16,8 @@ export function Dashboard() {
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'dashboard' | 'transactions' | 'reports'>('dashboard');
+    const [selectedTag, setSelectedTag] = useState<string | null>(null);
+    const [selectedDate, setSelectedDate] = useState<number | null>(null);
 
     const fetchExpenses = useCallback(async () => {
         // ... same fetch logic ...
@@ -26,6 +29,9 @@ export function Dashboard() {
             if (res.ok) {
                 const data = await res.json();
                 setExpenses(data.expenses);
+                setExpenses(data.expenses);
+                setSelectedTag(null); // Reset filter on new fetch
+                setSelectedDate(null);
             }
         } catch (error) {
             console.error("Failed to fetch expenses", error);
@@ -131,8 +137,15 @@ export function Dashboard() {
                             <ExpenseForm onSuccess={fetchExpenses} />
                         </div>
                         <div className="space-y-6">
-                            <h3 className="text-lg font-medium text-zinc-700">Quick Summary</h3>
-                            <ExpenseSummary expenses={expenses} />
+                            <h3 className="text-lg font-medium text-zinc-700">Today's Summary</h3>
+                            <ExpenseSummary
+                                expenses={expenses.filter(e => isSameDay(new Date(e.date), new Date()))}
+                                onTagClick={(tag) => {
+                                    setSelectedTag(tag);
+                                    setSelectedDate(null);
+                                    setActiveTab('transactions');
+                                }}
+                            />
                         </div>
                     </div>
                 )}
@@ -140,16 +153,51 @@ export function Dashboard() {
                 {activeTab === 'transactions' && (
                     <div className="space-y-6">
                         <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-medium text-zinc-700">All Transactions</h3>
-                            <p className="text-sm text-zinc-500">{expenses.length} records</p>
+                            <div className="flex items-center gap-3">
+                                <h3 className="text-lg font-medium text-zinc-700">
+                                    {selectedTag
+                                        ? `Transactions for "${selectedTag}"`
+                                        : selectedDate
+                                            ? `Transactions  for ${format(new Date(currentDate.getFullYear(), currentDate.getMonth(), selectedDate), "MMMM do")}`
+                                            : 'All Transactions'}
+                                </h3>
+                                {(selectedTag || selectedDate) && (
+                                    <button
+                                        onClick={() => {
+                                            setSelectedTag(null);
+                                            setSelectedDate(null);
+                                        }}
+                                        className="text-xs px-2.5 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 transition-colors"
+                                    >
+                                        Clear Filter
+                                    </button>
+                                )}
+                            </div>
+                            <p className="text-sm text-zinc-500">
+                                {selectedTag
+                                    ? expenses.filter(e => e.tag.name === selectedTag).length
+                                    : selectedDate
+                                        ? expenses.filter(e => new Date(e.date).getDate() === selectedDate).length
+                                        : expenses.length} records
+                            </p>
                         </div>
 
                         <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
-                            {expenses.length === 0 ? (
-                                <div className="p-8 text-center text-zinc-500">No transactions found for this month.</div>
+                            {(selectedTag
+                                ? expenses.filter(e => e.tag.name === selectedTag)
+                                : selectedDate
+                                    ? expenses.filter(e => new Date(e.date).getDate() === selectedDate)
+                                    : expenses
+                            ).length === 0 ? (
+                                <div className="p-8 text-center text-zinc-500">No transactions found.</div>
                             ) : (
                                 <div className="divide-y divide-zinc-100">
-                                    {expenses.map((expense) => (
+                                    {(selectedTag
+                                        ? expenses.filter(e => e.tag.name === selectedTag)
+                                        : selectedDate
+                                            ? expenses.filter(e => new Date(e.date).getDate() === selectedDate)
+                                            : expenses
+                                    ).map((expense) => (
                                         <div key={expense.id} className="flex items-center justify-between p-4 hover:bg-zinc-50/50 transition-colors">
                                             <div className="flex items-center gap-4">
                                                 <div
@@ -192,10 +240,22 @@ export function Dashboard() {
 
                 {activeTab === 'reports' && (
                     <div className="space-y-6">
-                        <h3 className="text-lg font-medium text-zinc-700">Monthly Details Report</h3>
-                        <div className="bg-white p-6 rounded-2xl border border-zinc-200 shadow-sm">
-                            <ExpenseSummary expenses={expenses} />
-                        </div>
+                        <h3 className="text-lg font-medium text-zinc-700">Analytics Dashboard</h3>
+                        <ReportsDashboard
+                            expenses={expenses}
+                            currentDate={currentDate}
+                            onDayClick={(day) => {
+                                setSelectedDate(day);
+                                setSelectedTag(null);
+                                setActiveTab('transactions');
+                            }}
+                            onTagClick={(tag) => {
+                                setSelectedTag(tag);
+                                setSelectedDate(null);
+                                setActiveTab('transactions');
+                            }}
+                            onDateChange={setCurrentDate}
+                        />
                     </div>
                 )}
             </main>
