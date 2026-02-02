@@ -207,7 +207,7 @@ export function ReportsDashboard({ currentDate, expenses, onDayClick, onTagClick
                                         ))}
                                     </Pie>
                                     <RechartsTooltip
-                                        formatter={(value: number) => `₹${value.toLocaleString()}`}
+                                        formatter={(value: number | undefined) => `₹${(value || 0).toLocaleString()}`}
                                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                                         itemStyle={{ color: '#374151', fontWeight: 500 }}
                                     />
@@ -291,7 +291,7 @@ export function ReportsDashboard({ currentDate, expenses, onDayClick, onTagClick
                             />
                             <RechartsTooltip
                                 cursor={{ fill: '#f9fafb' }}
-                                formatter={(value: number) => `₹${value.toLocaleString()}`}
+                                formatter={(value: number | undefined) => `₹${(value || 0).toLocaleString()}`}
                                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                             />
                             <Bar
